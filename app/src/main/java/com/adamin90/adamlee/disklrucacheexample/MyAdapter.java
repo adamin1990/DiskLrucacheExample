@@ -18,12 +18,14 @@ import android.widget.TextView;
 public class MyAdapter extends BaseAdapter{
 	private LayoutInflater layoutInflater;
 	private List<HePai> hepais;
+	private  String mainurl;
 	
 
-	public MyAdapter(LayoutInflater layoutInflater, List<HePai> hepais) {
+	public MyAdapter(LayoutInflater layoutInflater, List<HePai> hepais,String mainurl) {
 		super();
 		this.layoutInflater = layoutInflater;
 		this.hepais = hepais;
+		this.mainurl=mainurl;
 	}
 
 	@Override

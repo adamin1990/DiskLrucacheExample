@@ -1,6 +1,7 @@
 package com.adamin90.adamlee.disklrucacheexample;
 
 import android.os.AsyncTask;
+import android.os.HandlerThread;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,7 @@ import com.adamin90.adamlee.disklrucacheexample.utils.NetUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.litepal.crud.DataSupport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private LayoutInflater inflater;
     private MyAdapter adapter;
     private List<HePai> hepais;
+    boolean first=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +40,12 @@ public class MainActivity extends AppCompatActivity {
         listView=(ListView) findViewById(R.id.listView);
         inflater=getLayoutInflater();
         hepais=new ArrayList<HePai>();
-        adapter=new MyAdapter(inflater, hepais);
+        List<HePai> hePais2=DataSupport.findAll(HePai.class);
+        Log.e("hepai",hePais2.size()+"");
+        adapter=new MyAdapter(inflater, hepais,Constant.BASE_URL);
         listView.setAdapter(adapter);
         if(NetUtils.isConnected(this)){
-            new LoadTask().execute(Constant.BASE_URL);
+            new LoadTask().execute(Constant.BASE_URL,Constant.BASE_URL);
         }else{
             Toast.makeText(this, "网络不好", Toast.LENGTH_SHORT).show();
         }
@@ -49,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class LoadTask extends AsyncTask<String, Void, String> {
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -57,13 +63,18 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... params) {
+            if(params[1].equals(Constant.BASE_URL)){
+                first=true;
+            }else {
+                first=false;
+            }
             return HttpUtils.doGet(params[0]);
 
         }
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            hepais.addAll(ParseJson(result));
+            hepais.addAll(ParseJson(result,first));
             adapter.notifyDataSetChanged();
 
 
@@ -71,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private List<HePai> ParseJson(String result){
+    private List<HePai> ParseJson(String result,boolean isfirst){
         List<HePai> hePais=new ArrayList<HePai>();
         try {
             JSONArray jaArray=new JSONArray(result);
@@ -97,11 +108,14 @@ public class MainActivity extends AppCompatActivity {
                     String avstring=av.getString("origin");
                     target.setCover(avstring);
                 }
-
+                target.save();
+                hePai.save();
                 hePai.setTarget(target);
                 hePais.add(hePai);
 
+
             }
+
             return hePais;
         } catch (JSONException e) {
             // TODO Auto-generated catch block

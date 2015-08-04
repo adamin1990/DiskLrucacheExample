@@ -6,7 +6,7 @@ import org.xmlpull.v1.XmlPullParser;
 import android.graphics.Canvas;
 
 public class HePai extends DataSupport{
-	
+	private String mainurl;
 	private String id;
 	private String reason;
 	private String size;
@@ -42,6 +42,13 @@ public class HePai extends DataSupport{
 	public void setTarget(Target target) {
 		this.target = target;
 	}
-	
+
+	public String getMainurl() {
+		return mainurl;
+	}
+
+	public void setMainurl(String mainurl) {
+		this.mainurl = mainurl;
+	}
 }
 
