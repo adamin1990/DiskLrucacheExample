@@ -21,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
+import org.litepal.tablemanager.Connector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,17 +38,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Connector.getDatabase();
         listView=(ListView) findViewById(R.id.listView);
         inflater=getLayoutInflater();
         hepais=new ArrayList<HePai>();
-        List<HePai> hePais2=DataSupport.findAll(HePai.class);
-        Log.e("hepai",hePais2.size()+"");
         adapter=new MyAdapter(inflater, hepais,Constant.BASE_URL);
         listView.setAdapter(adapter);
         if(NetUtils.isConnected(this)){
             new LoadTask().execute(Constant.BASE_URL,Constant.BASE_URL);
         }else{
-            Toast.makeText(this, "网络不好", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "网络不好,启用缓存", Toast.LENGTH_SHORT).show();
+            List<HePai> hePaishuancun=DataSupport.findAll(HePai.class);
+            hepais.addAll(hePaishuancun);
+            adapter.notifyDataSetChanged();
         }
 
 
@@ -108,14 +111,17 @@ public class MainActivity extends AppCompatActivity {
                     String avstring=av.getString("origin");
                     target.setCover(avstring);
                 }
+
+                hePai.setTarget(target);
                 target.save();
                 hePai.save();
-                hePai.setTarget(target);
                 hePais.add(hePai);
 
 
             }
-
+            List<HePai> hePaishuancun=DataSupport.findAll(HePai.class);
+            List<Target> hePais2=DataSupport.findAll(Target.class);
+            Log.e("hepai", hePais2.size() + "");
             return hePais;
         } catch (JSONException e) {
             // TODO Auto-generated catch block

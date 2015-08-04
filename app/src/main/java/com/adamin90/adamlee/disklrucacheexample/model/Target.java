@@ -3,17 +3,30 @@ package com.adamin90.adamlee.disklrucacheexample.model;
 import org.litepal.crud.DataSupport;
 
 public class Target extends DataSupport{
-	private String id;
+	private long id;
+	private long hepai_id;
+
 	private String name;
 	private String lyric ;
 	private String audio_file;
 	private String cover;
-	public String getId() {
+
+	public long getHepai_id() {
+		return hepai_id;
+	}
+
+	public void setHepai_id(long hepai_id) {
+		this.hepai_id = hepai_id;
+	}
+
+	public long getId() {
 		return id;
 	}
-	public void setId(String id) {
+
+	public void setId(long id) {
 		this.id = id;
 	}
+
 	public String getName() {
 		return name;
 	}

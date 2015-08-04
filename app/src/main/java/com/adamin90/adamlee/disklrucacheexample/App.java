@@ -13,6 +13,7 @@ public class App extends LitePalApplication {
     public void onCreate() {
         super.onCreate();
         LitePalApplication.initialize(this);
-        SQLiteDatabase database=Connector.getDatabase();
+        CrashHandler crashHandler = CrashHandler.getInstance();
+        crashHandler.init(getApplicationContext());
     }
 }

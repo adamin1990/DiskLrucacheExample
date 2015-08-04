@@ -7,17 +7,20 @@ import android.graphics.Canvas;
 
 public class HePai extends DataSupport{
 	private String mainurl;
-	private String id;
+	private long id;
 	private String reason;
 	private String size;
 	private String created_at;
 	private Target target;
-	public String getId() {
+
+	public long getId() {
 		return id;
 	}
-	public void setId(String id) {
+
+	public void setId(long id) {
 		this.id = id;
 	}
+
 	public String getReason() {
 		return reason;
 	}
