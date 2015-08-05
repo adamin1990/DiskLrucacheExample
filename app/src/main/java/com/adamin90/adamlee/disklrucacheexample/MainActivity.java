@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private MyAdapter adapter;
     private List<HePai> hepais;
     boolean first=false;
+    private int page=1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,16 +47,38 @@ public class MainActivity extends AppCompatActivity {
         adapter=new MyAdapter(inflater, hepais,Constant.BASE_URL);
         listView.setAdapter(adapter);
         if(NetUtils.isConnected(this)){
-            new LoadTask().execute(Constant.BASE_URL,Constant.BASE_URL);
+            new LoadTask().execute(Constant.BASE_URL+1,Constant.BASE_URL+1);
         }else{
             Toast.makeText(this, "网络不好,启用缓存", Toast.LENGTH_SHORT).show();
-            List<HePai> hePaishuancun=DataSupport.findAll(HePai.class);
+            List<HePai> hePaishuancun=DataSupport.findAll(HePai.class,true);
             hepais.addAll(hePaishuancun);
             adapter.notifyDataSetChanged();
         }
 
+    listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        boolean idle=false;
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            if(scrollState==SCROLL_STATE_IDLE){
+                idle=true;
 
+            }else {
+                idle=false;
+            }
+
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            if(idle&&firstVisibleItem+visibleItemCount>=totalItemCount-1){
+                page++;
+                new LoadTask().execute(Constant.BASE_URL+page,Constant.BASE_URL+page);
+            }
+
+        }
+    });
     }
+
 
     class LoadTask extends AsyncTask<String, Void, String> {
 
@@ -66,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            if(params[1].equals(Constant.BASE_URL)){
+            if(params[1].equals(Constant.BASE_URL+1)){
                 first=true;
             }else {
                 first=false;
@@ -89,6 +113,9 @@ public class MainActivity extends AppCompatActivity {
         List<HePai> hePais=new ArrayList<HePai>();
         try {
             JSONArray jaArray=new JSONArray(result);
+            if(isfirst){
+                DataSupport.deleteAll(HePai.class);
+            }
 
             for(int i=0;i<jaArray.length();i++){
                 JSONObject jb=jaArray.getJSONObject(i);
@@ -119,9 +146,6 @@ public class MainActivity extends AppCompatActivity {
 
 
             }
-            List<HePai> hePaishuancun=DataSupport.findAll(HePai.class);
-            List<Target> hePais2=DataSupport.findAll(Target.class);
-            Log.e("hepai", hePais2.size() + "");
             return hePais;
         } catch (JSONException e) {
             // TODO Auto-generated catch block
