@@ -24,6 +24,8 @@ import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 import org.litepal.tablemanager.Connector;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,33 +111,35 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private List<HePai> ParseJson(String result,boolean isfirst){
-        List<HePai> hePais=new ArrayList<HePai>();
+    private List<HePai> ParseJson(String result,boolean isfirst) {
+        List<HePai> hePais = new ArrayList<HePai>();
         try {
-            JSONArray jaArray=new JSONArray(result);
-            if(isfirst){
+            JSONArray jaArray = new JSONArray(result);
+            if (isfirst) {
                 DataSupport.deleteAll(HePai.class);
             }
 
-            for(int i=0;i<jaArray.length();i++){
-                JSONObject jb=jaArray.getJSONObject(i);
-                HePai   hePai=new HePai();
-                Target  target=new Target();
-                String creage_at=jb.getString("created_at");
-                hePai.setCreated_at(creage_at);
-                JSONObject jb2=(JSONObject) jb.get("target");
+            for (int i = 0; i < jaArray.length(); i++) {
+                JSONObject jb = jaArray.getJSONObject(i);
+                HePai hePai = new HePai();
+                Target target = new Target();
+                String creage_at = jb.getString("created_at");
+                String s = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+                        .parse(creage_at).toLocaleString();
+                hePai.setCreated_at(s);
+                JSONObject jb2 = (JSONObject) jb.get("target");
 
 
-                String lyric=jb2.getString("name");
+                String lyric = jb2.getString("name");
                 target.setLyric(lyric);
-                if(!jb2.has("avatars")){
-                    JSONObject user= (JSONObject) jb2.get("user");
-                    JSONObject avator= (JSONObject) user.get("avatars");
-                    String image=avator.getString("origin");
+                if (!jb2.has("avatars")) {
+                    JSONObject user = (JSONObject) jb2.get("user");
+                    JSONObject avator = (JSONObject) user.get("avatars");
+                    String image = avator.getString("origin");
                     target.setCover(image);
-                }else{
-                    JSONObject av= (JSONObject) jb2.get("avatars");
-                    String avstring=av.getString("origin");
+                } else {
+                    JSONObject av = (JSONObject) jb2.get("avatars");
+                    String avstring = av.getString("origin");
                     target.setCover(avstring);
                 }
 
@@ -149,7 +153,10 @@ public class MainActivity extends AppCompatActivity {
             return hePais;
         } catch (JSONException e) {
             // TODO Auto-generated catch block
-            Log.e("",e.toString());
+            Log.e("", e.toString());
+            e.printStackTrace();
+            return new ArrayList<HePai>();
+        } catch (ParseException e) {
             e.printStackTrace();
             return new ArrayList<HePai>();
         }
